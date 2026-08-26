@@ -220,6 +220,47 @@
 <body>
 <div class="app" id="app"></div>
 
+<!-- Soft access gate (obscurity only, not real security: static hosting means
+     the page source and content are still viewable/downloadable). -->
+<div id="gate">
+  <div class="gatecard">
+    <div class="gatelock">&#128274;</div>
+    <h1>Password</h1>
+    <p>Enter the password to continue.</p>
+    <input id="gate-pw" type="password" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Password">
+    <div id="gate-err" role="alert"></div>
+    <button id="gate-go">Enter</button>
+  </div>
+</div>
+<style>
+  #gate{position:fixed;inset:0;z-index:9999;background:var(--ground,#F4F3F1);display:flex;align-items:center;justify-content:center;padding:24px}
+  #gate .gatecard{max-width:340px;width:100%;text-align:center;background:#fff;border:1px solid #DBD9D2;border-radius:12px;padding:28px 22px;box-shadow:0 10px 30px -20px rgba(18,33,30,.4)}
+  #gate .gatelock{font-size:40px;line-height:1}
+  #gate h1{font-family:Georgia,serif;font-size:22px;color:#12211E;margin:10px 0 4px}
+  #gate p{font-family:system-ui,-apple-system,sans-serif;font-size:13px;color:#4A554F;margin:0 0 16px}
+  #gate input{width:100%;height:48px;border:2px solid #DBD9D2;border-radius:8px;font-size:18px;text-align:center;padding:0 12px;font-family:system-ui,-apple-system,sans-serif;color:#12211E}
+  #gate input:focus{outline:none;border-color:#3F6B34}
+  #gate #gate-err{min-height:18px;color:#C25B5B;font-size:13px;margin:8px 0;font-family:system-ui,-apple-system,sans-serif}
+  #gate button{width:100%;height:50px;border:none;border-radius:8px;background:#3F6B34;color:#fff;font-size:17px;font-weight:700;cursor:pointer;box-shadow:0 3px 0 0 #2C4E24}
+  #gate button:active{transform:translateY(3px);box-shadow:0 0 0 0 #2C4E24}
+</style>
+<script>
+(function(){
+  function h(s){var x=5381;for(var i=0;i<s.length;i++){x=((x<<5)+x+s.charCodeAt(i))>>>0;}return x;}
+  var HASH=2090084184,KEY='ba_gate_ok';
+  var gate=document.getElementById('gate'),appEl=document.getElementById('app');
+  function unlock(){try{sessionStorage.setItem(KEY,'1');}catch(e){}gate.parentNode&&gate.parentNode.removeChild(gate);if(appEl)appEl.style.display='';}
+  function unlocked(){try{return sessionStorage.getItem(KEY)==='1';}catch(e){return false;}}
+  if(unlocked()){unlock();return;}
+  if(appEl)appEl.style.display='none';
+  var pw=document.getElementById('gate-pw'),err=document.getElementById('gate-err'),go=document.getElementById('gate-go');
+  function attempt(){if(h(pw.value)===HASH){unlock();}else{err.textContent='Incorrect password.';pw.value='';pw.focus();}}
+  go.onclick=attempt;
+  pw.addEventListener('keydown',function(e){if(e.key==='Enter')attempt();});
+  pw.focus();
+})();
+</script>
+
 <script>
 (function(){
 "use strict";
